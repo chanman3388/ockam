@@ -5,6 +5,7 @@ use crate::error::ApiError;
 use crate::nodes::models::secure_channel::{
     CreateSecureChannelListenerRequest, CreateSecureChannelRequest, CreateSecureChannelResponse,
     CredentialExchangeMode, DeleteSecureChannelRequest, DeleteSecureChannelResponse,
+    DeleteSecureChannelListenerRequest, DeleteSecureChannelListenerResponse,
     ShowSecureChannelRequest, ShowSecureChannelResponse,
 };
 use crate::nodes::registry::Registry;
@@ -404,5 +405,27 @@ impl NodeManagerWorker {
         let response = Response::ok(req.id());
 
         Ok(response)
+    }
+
+    pub(super) async fn delete_secure_channel_listener<'a>(
+        &mut self,
+        req: &Request<'_>,
+        dec: &mut Decoder<'_>,
+    ) -> Result<ResponseBuilder<DeleteSecureChannelListenerResponse<'a>>> {
+        let body: DeleteSecureChannelListenerRequest = dec.decode()?;
+        let addr = Address::from(body.addr.as_ref());
+        info!(%addr, "Handling request to delete secure channel listener");
+        let mut node_manager = self.node_manager.write().await;
+        let res = match node_manager.delete_secure_channel_listener(&addr).await {
+            Ok(()) => {
+                trace!(%addr, "Removed secure channel listener");
+                Some(addr)
+            }
+            Err(err) => {
+                trace!(%addr, %err, "Error removing secure channel listener");
+                None
+            }
+        };
+        Ok(Response::ok(req.id()).body(DeleteSecureChannelListenerResponse::new(res)))
     }
 }
