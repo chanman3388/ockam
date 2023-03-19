@@ -604,10 +604,6 @@ impl NodeManagerWorker {
                 .create_secure_channel_listener(req, dec, ctx)
                 .await?
                 .to_vec()?,
-            (Delete, ["node", "secure_channel_listener"]) => self
-                .delete_secure_channel_listener(req, dec, ctx)
-                .await?
-                .to_vec()?,
             // ==*== Services ==*==
             (Post, ["node", "services", DefaultAddress::VAULT_SERVICE]) => {
                 self.start_vault_service(ctx, req, dec).await?.to_vec()?

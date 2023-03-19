@@ -145,7 +145,7 @@ impl<'a> DeleteSecureChannelListenerRequest<'a> {
     }
 }
 
-/// Request body when deleting a Secure Channel Listener
+/// Response body when deleting a Secure Channel Listener
 #[derive(Debug, Clone, Decode, Encode)]
 #[rustfmt::skip]
 #[cbor(map)]

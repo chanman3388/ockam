@@ -39,8 +39,8 @@ async fn run_impl(
 
     let node = extract_address_value(at)?;
     let mut rpc = Rpc::background(ctx, &opts, &node)?;
-    let req = Request::post("/node/secure_channel_listener")
-        .body(DeleteSecureChannelListenerRequest::new(&cmd.address));
+    let req = Request::delete(
+        format!("/node/secure_channel_listener/{}", &node));
     rpc.request(req).await?;
     rpc.is_ok()?;
 
