@@ -1,13 +1,11 @@
 use clap::Args;
 
 use ockam::Context;
-use ockam_api::nodes::models::secure_channel::DeleteSecureChannelListenerRequest;
-use ockam_core::api::Request;
 use ockam_core::Address;
 
 use super::common::SecureChannelListenerNodeOpts;
 use crate::secure_channel::HELP_DETAIL;
-use crate::util::{extract_address_value, node_rpc, Rpc};
+use crate::util::{api, extract_address_value, node_rpc, Rpc};
 use crate::{help, CommandGlobalOpts};
 
 /// Create Secure Channel Listeners
@@ -39,8 +37,7 @@ async fn run_impl(
 
     let node = extract_address_value(at)?;
     let mut rpc = Rpc::background(ctx, &opts, &node)?;
-    let req = Request::delete(
-        format!("/node/secure_channel_listener/{}", &node));
+    let req = api::delete_secure_channel_listener(&cmd.address);
     rpc.request(req).await?;
     rpc.is_ok()?;
 

@@ -237,6 +237,14 @@ impl NodeManager {
         Ok(())
     }
 
+    pub(super) async fn delete_secure_channel_listener_impl(
+        &mut self, addr: &Address,
+    ) -> Result<()> {
+        info!("Handling request to delete secure channel listener: {addr}");
+        self.registry.secure_channel_listeners.remove(addr);
+        Ok(())
+    }
+
 }
 
 impl NodeManagerWorker {
@@ -406,5 +414,27 @@ impl NodeManagerWorker {
         let response = Response::ok(req.id());
 
         Ok(response)
+    }
+
+    pub(super) async fn delete_secure_channel_listener<'a>(
+        &mut self,
+        req: &Request<'_>,
+        dec: &mut Decoder<'_>,
+    ) -> Result<ResponseBuilder<DeleteSecureChannelListenerResponse<'a>>> {
+        let body: DeleteSecureChannelListenerRequest = dec.decode()?;
+        let addr = Address::from(body.addr.as_ref());
+        info!(%addr, "Handling request to delete secure channel listener");
+        let mut node_manager = self.node_manager.write().await;
+        let res = match node_manager.delete_secure_channel_listener_impl(&addr).await {
+            Ok(()) => {
+                trace!(%addr, "Removed secure channel listener");
+                Some(addr)
+            }
+            Err(err) => {
+                trace!(%addr, %err, "Error removing secure channel listener");
+                None
+            }
+        };
+        Ok(Response::ok(req.id()).body(DeleteSecureChannelListenerResponse::new(res)))
     }
 }
